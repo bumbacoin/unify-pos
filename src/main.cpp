@@ -3235,13 +3235,13 @@ bool LoadBlockIndex()
     if (fTestNet)
     {
         pchMessageStart[0] = 0xb5;
-        pchMessageStart[1] = 0xbb;
-        pchMessageStart[2] = 0xdd;
-        pchMessageStart[3] = 0x7b;
+        pchMessageStart[1] = 0xbc;
+        pchMessageStart[2] = 0xdc;
+        pchMessageStart[3] = 0x7c;
         hashGenesisBlock = hashGenesisBlockTestNet;
-        nTargetSpacing = nTargetSpacing_v2;  // 1 * 60
-        LAST_POW_BLOCK=150;
-        nStakeMinAge = 1 * 60;
+//        nTargetSpacing = nTargetSpacing_v2;  // 1 * 60
+//        LAST_POW_BLOCK=150;
+//        nStakeMinAge = 1 * 60;
     }
 
     //
