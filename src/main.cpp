@@ -1152,7 +1152,7 @@ int64 GetProofOfStakeReward(int64 nCoinAge, int64 nFees)
 }
 
 static const int64 nTargetTimespan = 1 * 60;
-const int64 nTargetSpacing = 30; //nTargetSpacing_v1;
+const int64 nTargetSpacing = 10 * 60; //nTargetSpacing_v1;
 static const int64 nInterval = nTargetTimespan / nTargetSpacing;
 
 
