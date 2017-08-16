@@ -90,7 +90,7 @@ set<pair<COutPoint, unsigned int> > setStakeSeenOrphan;
 static CBigNum bnProofOfStakeLimit(~uint256(0) >> 20);
 int64 nReserveBalance = 0;
 
-unsigned int nStakeMinAge = 4 * 60 * 60; // 4 hours
+unsigned int nStakeMinAge = 1 * 60; // 
 unsigned int nStakeMaxAge = 30 * 24 *  60 * 60; // 30 days
 extern enum Checkpoints::CPMode CheckpointsMode;
 
@@ -1151,8 +1151,8 @@ int64 GetProofOfStakeReward(int64 nCoinAge, int64 nFees)
     return nSubsidy + nFees;
 }
 
-static const int64 nTargetTimespan = 10 * 60;
-const int64 nTargetSpacing = 5 * 60; //nTargetSpacing_v1;
+static const int64 nTargetTimespan = 1 * 60;
+const int64 nTargetSpacing = 30; //nTargetSpacing_v1;
 static const int64 nInterval = nTargetTimespan / nTargetSpacing;
 
 
