@@ -1,9 +1,9 @@
 Building Unify
 
-See doc/readme-qt.rst for instructions on building Potcoin-Qt,
+See doc/readme-qt.rst for instructions on building Unify-Qt,
 the intended-for-end-users, nice-graphical-interface, reference
-implementation of Potcoin.
+implementation of Unify.
 
-See doc/build-*.txt for instructions on building potcoind,
+See doc/build-*.txt for instructions on building unifyd,
 the intended-for-services, no-graphical-interface, reference
-implementation of Potcoin.
+implementation of Unify.
