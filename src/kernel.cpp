@@ -286,9 +286,9 @@ static bool GetKernelStakeModifier(uint256 hashBlockFrom, uint64& nStakeModifier
         if (!pindex->pnext)
         {   // reached best block; may happen if node is behind on block chain
             if (fPrintProofOfStake || (pindex->GetBlockTime() + nStakeMinAge - nStakeModifierSelectionInterval > GetAdjustedTime()))
-                return error("GetKernelStakeModifier() : reached best block at height %d from block at hight %d",
-                    pindex->nHeight, pindexFrom->nHeight);
-            else
+                return error("GetKernelStakeModifier() : reached best block at height %d from block at hight %d with nStakeModifierSelectionInterval %"PRI64d" \n ",
+                    pindex->nHeight, pindexFrom->nHeight, nStakeModifierSelectionInterval);
+	else
                 return false;
         }
         pindex = pindex->pnext;

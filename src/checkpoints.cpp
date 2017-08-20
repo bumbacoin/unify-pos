@@ -1,5 +1,4 @@
-// Copyright (c) 2009-2012 The Bitcoin developers
-// Distributed under the MIT/X11 software license, see the accompanying
+// Copyright (c) 2009-2012 The Bitcoin developers // Distributed under the MIT/X11 software license, see the accompanying 
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <boost/assign/list_of.hpp> // for 'map_list_of()'
@@ -53,7 +52,8 @@ namespace Checkpoints
 
     static MapCheckpoints mapCheckpointsTestnet =
         boost::assign::map_list_of
-        (  0, uint256("0x943dc625657143761f0f01dbf08c45a02260fc4089a27b20de3e42ae8a49154f"))
+        (  0, uint256("0x943dc625657143761f0f01dbf08c45a02260fc4089a27b20de3e42ae8a49154f")) 
+//        (  206, uint256("0x943dc625657143761f0f01dbf08c45a02260fc4089a27b20de3e42ae8a49154f"))
         ;
     static const CCheckpointData dataTestnet = {
         &mapCheckpointsTestnet,

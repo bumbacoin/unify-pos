@@ -62,7 +62,7 @@ static const int64 MAX_MONEY = 18181818 * COIN;
 inline bool MoneyRange(int64 nValue) { return (nValue >= 0 && nValue <= MAX_MONEY); }
 
 // Unify PoS
-static const int LAST_POW_BLOCK = 200;
+static const int LAST_POW_BLOCK = 205;
 //static const int64 COIN_YEAR_REWARD = 5 * CENT; // 5% per year
 
 /** Coinbase transaction outputs can only be spent after this number of new blocks (network rule) */
