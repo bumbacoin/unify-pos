@@ -1,5 +1,5 @@
 src/*.exe
-src/unify
+src/unify*
 src/unifyd
 src/test_unify
 .*.swp
@@ -10,6 +10,7 @@ src/test_unify
 *.o
 *.patch
 .unify
+src/leveldb/lib*
 
 # Compilation and Qt preprocessor part
 *.qm

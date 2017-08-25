@@ -90,7 +90,12 @@ set<pair<COutPoint, unsigned int> > setStakeSeenOrphan;
 static CBigNum bnProofOfStakeLimit(~uint256(0) >> 20);
 int64 nReserveBalance = 0;
 
-unsigned int nStakeMinAge = 4 * 60 * 60; // 4 hours
+static const int64 nTargetTimespan = 10 * 60;
+unsigned int nTargetSpacing = TARGETSPACING_1; // 1 * 30
+//static const int64 nTargetSpacing = nTargetSpacing_v1;
+static const int64 nInterval = nTargetTimespan / nTargetSpacing;
+
+unsigned int nStakeMinAge = 4 * 60; // 1 minutes
 unsigned int nStakeMaxAge = 30 * 24 *  60 * 60; // 30 days
 extern enum Checkpoints::CPMode CheckpointsMode;
 
@@ -1151,11 +1156,6 @@ int64 GetProofOfStakeReward(int64 nCoinAge, int64 nFees)
     return nSubsidy + nFees;
 }
 
-static const int64 nTargetTimespan = 10 * 60;
-const int64 nTargetSpacing = 5 * 60; //nTargetSpacing_v1;
-static const int64 nInterval = nTargetTimespan / nTargetSpacing;
-
-
 //
 // maximum nBits value could possible be required nTime after
 //
@@ -1163,8 +1163,8 @@ unsigned int static ComputeMaxBits(CBigNum bnTargetLimit, unsigned int nBase, in
 {
     // Testnet has min-difficulty blocks
     // after nTargetSpacing*2 time between blocks:
-    if (fTestNet && nTime > nTargetSpacing*2)
-        return bnTargetLimit.GetCompact();
+//    if (fTestNet && nTime > nTargetSpacing*2)
+//        return bnTargetLimit.GetCompact();
 
     CBigNum bnResult;
     bnResult.SetCompact(nBase);
@@ -1198,9 +1198,19 @@ unsigned int ComputeMinWork(unsigned int nBase, int64 nTime)
 //
 unsigned int ComputeMinStake(unsigned int nBase, int64 nTime)
 {
-    return ComputeMaxBits(bnProofOfStakeLimit, nBase, nTime);
+    CBigNum bnResult;
+    bnResult.SetCompact(nBase);
+    bnResult *= 2;
+    while (nTime > 0 && bnResult < bnProofOfWorkLimit)
+    {
+        // Maximum 200% adjustment per day...
+        bnResult *= 2;
+        nTime -= 24 * 60 * 60;
+    }
+    if (bnResult > bnProofOfWorkLimit)
+        bnResult = bnProofOfWorkLimit;
+    return bnResult.GetCompact();
 }
-
 
 // ppcoin: find last block index up to pindex
 const CBlockIndex* GetLastBlockIndex(const CBlockIndex* pindex, bool fProofOfStake)
@@ -1337,6 +1347,59 @@ unsigned int static DarkGravityWave(const CBlockIndex* pindexLast, const CBlockH
     return bnNew.GetCompact();
 }
 
+unsigned int static GetPoSDifficulty(const CBlockIndex* pindexLast, const CBlockHeader *pblock)
+{
+    if (fDebug)
+	      printf("New PoS Difficulty Protocol ACTIVE");
+
+	CBigNum bnTargetLimit = bnProofOfWorkLimit;
+
+    if (pindexBest->nHeight+1 >= LAST_POW_BLOCK)
+    {
+        nTargetSpacing = TARGETSPACING_2;
+    }
+    else
+    {
+        nTargetSpacing = TARGETSPACING_1;
+    }
+
+//	nTargetSpacing = TARGETSPACING_2;
+
+        // Reset difficulty for PoS switchover
+        if (pindexLast->nHeight < LAST_POW_BLOCK + 50)
+                return bnTargetLimit.GetCompact();
+
+	const CBlockIndex* pindexPrev = GetLastBlockIndex(pindexLast, true);
+    const CBlockIndex* pindexPrevPrev = GetLastBlockIndex(pindexPrev->pprev, true);
+
+    int64 nActualSpacing = pindexPrev->GetBlockTime() - pindexPrevPrev->GetBlockTime();
+
+	 // Normalize extreme values
+	 if (nActualSpacing < 1)
+	 	nActualSpacing = 1;
+	 if (nActualSpacing > 2200)
+	 	nActualSpacing = 2200;
+
+    // ppcoin: target change every block
+    // ppcoin: retarget with exponential moving toward target spacing
+    CBigNum bnNew;
+    bnNew.SetCompact(pindexPrev->nBits);
+    bnNew *= ((nInterval - 1) * nTargetSpacing + nActualSpacing + nActualSpacing);
+    bnNew /= ((nInterval + 1) * nTargetSpacing);
+
+    if (bnNew > bnTargetLimit)
+        bnNew = bnTargetLimit;
+
+
+    /// debug print
+    printf("GetNextWorkRequired RETARGET\n");
+    printf("nTargetTimespan = %"PRI64d"    nActualSpacing = %"PRI64d"\n", nTargetTimespan, nActualSpacing);
+    printf("Before: %08x  %s\n", pindexLast->nBits, CBigNum().SetCompact(pindexLast->nBits).getuint256().ToString().c_str());
+    printf("After:  %08x  %s\n", bnNew.GetCompact(), bnNew.getuint256().ToString().c_str());
+
+    return bnNew.GetCompact();
+}
+
 unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader *pblock)
 {
     // always mine PoW blocks at the lowest diff on testnet
@@ -1345,10 +1408,19 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
 */
 	// A small period prior to DGW
 
-	if (pindexLast->nHeight > 2211)
+/*	if (pindexLast->nHeight > 2211)
 		return DarkGravityWave(pindexLast, pblock);		
-	
-	return GetNextWorkRequired_V1(pindexLast, pblock);		
+*/
+
+        if (pindexLast->nHeight < LAST_POW_BLOCK)
+		return GetNextWorkRequired_V1(pindexLast, pblock);
+	if (pindexLast->nHeight >= LAST_POW_BLOCK)
+		return GetPoSDifficulty(pindexLast, pblock);
+
+//    	if  (DiffMode == 1) { return GetNextWorkRequired_V1(pindexLast, pblock); }
+//	else if (DiffMode ==3 ) { return GetPoSDifficulty(pindexLast, pblock); }
+
+		return GetPoSDifficulty(pindexLast, pblock);
 }
 
 bool CheckProofOfWork(uint256 hash, unsigned int nBits)
@@ -3239,9 +3311,9 @@ bool LoadBlockIndex()
         pchMessageStart[2] = 0xdd;
         pchMessageStart[3] = 0x7b;
         hashGenesisBlock = hashGenesisBlockTestNet;
-        nTargetSpacing = nTargetSpacing_v2;  // 1 * 60
-        LAST_POW_BLOCK=150;
-        nStakeMinAge = 1 * 60;
+//        nTargetSpacing = nTargetSpacing_v2;  // 1 * 60
+//        LAST_POW_BLOCK=150;
+//        nStakeMinAge = 1 * 60;
     }
 
     //

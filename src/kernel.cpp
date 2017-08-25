@@ -11,12 +11,14 @@
 
 using namespace std;
 
+extern unsigned int nTargetSpacing;
+
 typedef std::map<int, uint64> MapModifierCheckpoints;
 
 // This leads to a modifier selection interval of 27489 seconds,
 // which is roughly 7 hours 38 minutes, just a bit shorter than
 // the minimum stake age of 8 hours.
-unsigned int nModifierInterval = 13 * 60;
+unsigned int nModifierInterval = 4 * 59; // shorter than min stake age of 4 minutes
 
 // FIXME
 // Hard checkpoints of stake modifiers to ensure they are deterministic
@@ -286,9 +288,9 @@ static bool GetKernelStakeModifier(uint256 hashBlockFrom, uint64& nStakeModifier
         if (!pindex->pnext)
         {   // reached best block; may happen if node is behind on block chain
             if (fPrintProofOfStake || (pindex->GetBlockTime() + nStakeMinAge - nStakeModifierSelectionInterval > GetAdjustedTime()))
-                return error("GetKernelStakeModifier() : reached best block at height %d from block at hight %d",
-                    pindex->nHeight, pindexFrom->nHeight);
-            else
+                return error("GetKernelStakeModifier() : reached best block at height %d from block at hight %d with nStakeModifierSelectionInterval %"PRI64d" \n ",
+                    pindex->nHeight, pindexFrom->nHeight, nStakeModifierSelectionInterval);
+	else
                 return false;
         }
         pindex = pindex->pnext;
